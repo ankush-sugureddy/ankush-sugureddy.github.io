@@ -1,8 +1,15 @@
+import { resumeData } from './data.js';
+
 /* ============================================================
    MAIN.JS — Core interactivity
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // ---- Render Dynamic Content ----
+  renderTimeline();
+  renderCertifications();
+  renderSkills();
+
   // ---- Theme Toggle ----
   initTheme();
 
@@ -170,4 +177,77 @@ function initActiveNav() {
   });
 
   sections.forEach(section => observer.observe(section));
+}
+
+/* ============================================================
+   DYNAMIC RENDERING
+   ============================================================ */
+function renderTimeline() {
+  const t = document.getElementById('timeline');
+  if (!t) return;
+  const colors = ["#f6821f", "#ff9900", "#0071dc", "#e4002b", "#6c5ce7", "#0033a0", "#0077c8", "#8c1d40", "#003087", "#2d9cdb"];
+  t.innerHTML = resumeData.experience.map((d, i) => {
+    const dir = i % 2 === 0 ? 'reveal-left' : 'reveal-right';
+    const color = colors[i % colors.length];
+    
+    const processedHighlights = d.highlights.map(h => h.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'));
+    const techTags = d.tech ? `<div class="timeline__tech">${d.tech.split(', ').map(tech => `<span class="timeline__tech-tag">${tech}</span>`).join('')}</div>` : '';
+    
+    return `<div class="timeline__item ${dir}">
+      <div class="timeline__dot" style="border-color:${color}"></div>
+      <div class="timeline__card glass-card">
+        <div class="timeline__company">
+          <span class="timeline__company-badge" style="background:${color}"></span>
+          <span class="timeline__company-name">${d.company}</span>
+        </div>
+        <h3 class="timeline__role">${d.role}</h3>
+        <span class="timeline__date">${d.date}</span>
+        <ul class="timeline__highlights">
+          ${processedHighlights.map(h => `<li>${h}</li>`).join('')}
+        </ul>
+        ${techTags}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderCertifications() {
+  const grid = document.getElementById('certifications-grid');
+  if (!grid) return;
+  grid.innerHTML = resumeData.certifications.map((cert, i) => {
+    const stagger = (i % 5) + 1;
+    return `<div class="cert-card glass-card reveal stagger-${stagger}">
+        <div class="cert-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <div class="cert-card__content">
+          <h3 class="cert-card__title">${cert.name}</h3>
+          <p class="cert-card__issuer">${cert.issuer}</p>
+          ${cert.date ? `<span class="cert-card__date">${cert.date}</span>` : ''}
+          ${cert.id ? `<span class="cert-card__id">Credential ID: ${cert.id} ${cert.url ? `<a href="${cert.url}" target="_blank" style="color:var(--accent-primary);text-decoration:none;font-weight:600;">[Verify]</a>` : ''}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderSkills() {
+  const grid = document.getElementById('skills-grid');
+  if (!grid) return;
+  const categoryIcons = {
+    "AI & Machine Learning": "🤖",
+    "Cloud Platforms": "☁️",
+    "Data Engineering": "⚡",
+    "Programming & Infra": "💻",
+    "Databases": "🗄️"
+  };
+  grid.innerHTML = resumeData.skills.map((skill, i) => {
+    const stagger = (i % 6) + 1;
+    const icon = categoryIcons[skill.category] || "🚀";
+    const tags = skill.items.split(', ').map(tag => `<span class="skill-tag">${tag}</span>`).join('');
+    return `<div class="skill-category glass-card reveal stagger-${stagger}">
+        <div class="skill-category__icon">${icon}</div>
+        <h3 class="skill-category__title">${skill.category}</h3>
+        <div class="skill-category__items">${tags}</div>
+      </div>`;
+  }).join('');
 }

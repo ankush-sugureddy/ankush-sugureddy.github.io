@@ -1,5 +1,5 @@
 import './style.css'
-import { resumeData } from './src/data.js'
+import { resumeData } from '../../scripts/data.js'
 
 document.querySelector('#app').innerHTML = `
   <header class="header">
